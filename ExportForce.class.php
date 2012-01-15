@@ -734,7 +734,7 @@ class ExportForce
 	function geteftransactions($skip=0, $limit=0, $inout=null, $ab_tid=null, $ab_time=null, $type=null, $target=null)
 	{
 		$efQuery = 'lose/tlist.php?'.$this->_efstr;
-		return _gettransactions($efQuery, $skip, $limit, $inout, $ab_tid, $ab_time, $type, $target);
+		return $this->_gettransactions($efQuery, $skip, $limit, $inout, $ab_tid, $ab_time, $type, $target);
 	}
 
 	/** Überprüft eine getätigte Transaktion
