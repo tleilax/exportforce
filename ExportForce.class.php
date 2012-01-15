@@ -108,34 +108,6 @@
   $exportforce->setapipath = ('');
 
  ****************************************************************** ** *
- * CHANGELOG (+ added, - removed, = changed):
- ********************************************* ** *
- v1.64 (2010-02-08):
-  + Neuen EF-Status-Code 1097 hinzugefügt
- v1.63.0 (2008-07-30):
-  = Umstrukturiert
-  = Neue Lizenz
-  = Ab jetzt auf code.google.com gehostet
- v1.62.1 (2006-08-23):
-  = Fiese Debugmeldung, die keinem aufgefallen ist, rausgenommen.
-    (SORRY!!)
- v1.62 (2006-07-07):
-  + Auf sämtliche Passwörter wird urlencode() angewandt.
- v1.61 (2005-08-10):
-  = Fehlerverhalten bei Downtime von klamm verändert
- v1.6 (2005-03-02):
-  + Logging implementiert
-  + Fehlermeldungen verbessert/erweitert
-  - Peinlichen Fehler in den RegEx des Konstruktors entfernt
- v1.52 (2005-03-01):
-  + Transaktionen eines Users abrufen (noch sehr rudimentär)
-  + Transaktionen eines EF-Accounts abrufen (ebenso rudimentär)
-  + Klammstatistiken abrufen
-  + Accountdaten eines Users abrufen
- v1.51 (2005-02-28):
-  + Setter für die API-Verbindung
-  = Variablen umbenannt
- ****************************************************************** ** *
  */
 
 class ExportForce
