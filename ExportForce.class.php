@@ -481,7 +481,7 @@ class ExportForce
 	 ***********************************************************************/
 	function getuserstatistics($klammid, $statspw)
 	{
-		$efQuery = 'klamm/data.php?'.$this->efstr.'&k_id='.$klammid.'&s_pw='.urlencode($statspw);
+		$efQuery = 'klamm/data.php?'.$this->_efstr.'&k_id='.$klammid.'&s_pw='.urlencode($statspw);
 
 		if (($kret = $this->_efQuery($efQuery))===false)
 		{
