@@ -1,60 +1,8 @@
 <?php
 /* ExportForce-Klasse v1.64 by tleilax [klammId 27936], 2010-02-08
- ****************************************************************** ** *
- * Diese Klasse wird immer unter folgender Addrese zu finden sein:
- *         https://github.com/tleilax/exportforce/
- ****************************************************************** ** *
  *
  * Copyright (c) 2005-2011 Jan-Hendrik Willms <tleilax+ef2@gmail.com>
  * Lizensiert unter der MIT-Lizenz.
- *
- ****************************************************************** ** *
- * Diese Datei sollte unter ExportForce.class.php gespeichert werden.
- ****************************************************************** ** *
- * Die Logfunktion:
- *   Beim Erzeugen der Klasse kann mittels des Parameters $logfunc der
- *   Name einer selbst geschriebenen Log-Funktion angegeben werden,
- *   die anschliessend bei jedem Query aufgerufen wird.
- *   Die Funktion muss folgenden Aufbau haben:
- *
- *     function funktionsname($ip, $query, $result);
- *
- *   Die Parameter im Einzelnen:
- *     $ip     - Die IP des Aufrufers des Skriptes
- *     $query  - Die an ExportForce gesendete Anfrage
- *     $result - Die erste von ExportForce zurückgelieferte Zeile
- *               oder 'No connect', falls EF nicht ansprechbar ist,
- *               bzw 'No result', wenn EF nichts zurücklieferte
- *
- *  !! WICHTIG !!
- *   Beim Übergaben der Funktion darf nur der Funktionsname übergeben
- *   werden!
- *
- *   Wie die Funktion das Loggen übernimmt, bleibt dem Anwender
- *   überlassen. Hier nur ein funktionierendes Anwendungsbeispiel:
- ***************************************************************** ** *
- <?php
-  define('LOGFILE', './log/efqueries.log');
-  function _logger($ip, $query, $result) {
-    $fp = fopen(LOGFILE, 'a');
-    if (!$fp)
-      return;
-    fputs($fp, time().' '.$ip.' '.$query.' '.$result."\r\n");
-    fclose($fp);
-  }
-  ...
-  $ef = new ExportForce($efid, $efpw, $efkennung, true, '_logger');
- ?>
- ****************************************************************** ** *
- * Hinweis zur Verwendung mit D-EF.de (DevelopmentExportforce):
- *   Diese Klasse ist durch zwei einzufügende Zeilen problemlos mit
- *   D-EF.de nutzbar:
- ********************* ** *
-
-  $exportforce->setapiurl('www.d-ef.de');
-  $exportforce->setapipath = ('');
-
- ****************************************************************** ** *
  */
 
 class ExportForce
