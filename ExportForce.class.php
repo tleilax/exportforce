@@ -261,33 +261,36 @@ class ExportForce {
 
     /** Liest statistische Werte eines Users aus
      * Parameter:
-     *  $klammid - klammID des Users
-     *  $statspw - Statistik-Passwort des Users (nicht Losepasswort!)
+     * @param int    $klammid klammID des Nutzers
+     * @param String $statspw Statistik-Passwort des Nutzers
+     * @param bool   $reduce  Gibt an, ob nur vorhandene Notifications
+     *                        zurückgegeben werden (Anzahl > 0)
      *
      * Rückgabe:
      *  false, falls ein Fehler aufgetreten ist
      *  Ansonsten ein Array mit folgendem Aufbau:
-     *   'msg'         => Anzahl neuer Nachrichten für den User
-     *   'pn'          => Anzahl neuer PNs für den User
-     *   'bew'         => Anzahl neuer Bewertungen des Users
-     *   'gb'          => Anzahl neuer Gästebucheinträge
-     *   'membernews'  => Neue Membernews für den User?
-     *   'umfrage'     => Umfrage auf der Startseite?
-     *   'special'     => Spezialfenster auf der Startseite?
-     *   'reload'      => Sekunden, die der User noch im Reload ist
-     *   'kontostand'  => Kontostand des Users in Euro
-     *   'lose'        => Anzahl der Lose des Users
-     *   'lose_tresor' => Anzahl der Lose im Tresor
-     *   'lose_spent'  => Anzahl der gespendeten Lose
-     *   'lose_shred'  => Anzahl der geshredderten Lose
-     *   'last_trans'  => Timestamp der letzten Transaktion
-     *   'gender'      => Geschlecht (1 - männlich, 2 - weiblich)
-     *   'birthday'    => Timestamp des Geburtstages
-     *   'refs'        => Array[1..5] mit der Anzahl der Refs der
-     *                    jeweiligen Ebene
-     *   'myfriends'   => Array[0..x] aller myFriends, die online sind
+     *   'msg'           => Anzahl neuer Nachrichten für den User
+     *   'pn'            => Anzahl neuer PNs für den User
+     *   'bew'           => Anzahl neuer Bewertungen des Users
+     *   'gb'            => Anzahl neuer Gästebucheinträge
+     *   'membernews'    => Neue Membernews für den User?
+     *   'umfrage'       => Umfrage auf der Startseite?
+     *   'special'       => Spezialfenster auf der Startseite?
+     *   'reload'        => Sekunden, die der User noch im Reload ist
+     *   'kontostand'    => Kontostand des Users in Euro
+     *   'lose'          => Anzahl der Lose des Users
+     *   'lose_tresor'   => Anzahl der Lose im Tresor
+     *   'lose_spent'    => Anzahl der gespendeten Lose
+     *   'lose_shred'    => Anzahl der geshredderten Lose
+     *   'last_trans'    => Timestamp der letzten Transaktion
+     *   'gender'        => Geschlecht (1 - männlich, 2 - weiblich)
+     *   'birthday'      => Timestamp des Geburtstages
+     *   'refs'          => Array[1..5] mit der Anzahl der Refs der
+     *                      jeweiligen Ebene
+     *   'myfriends'     => Array[0..x] aller myFriends, die online sind
+     *   'notifications' => Name und Anzahl der aktuellen Notifications
      ***********************************************************************/
-    function getuserstatistics($klammid, $statspw) {
+    function getuserstatistics($klammid, $statspw, $reduce_notifications = true) {
         $efQuery = 'klamm/data.php?'.$this->_efstr.'&k_id='.$klammid.'&s_pw='.urlencode($statspw);
 
         if (($kret = $this->_efQuery($efQuery)) === false) {
@@ -302,37 +305,66 @@ class ExportForce {
         $result = array();
         // Zeile 1: msg|pn|bew|gb|membernews|umfrage|special|reload|kontostand
         $t = explode('|', $kret[1]);
-        $result['msg'] = $t[0];
-        $result['pn'] = $t[1];
-        $result['bew'] = $t[2];
-        $result['gb'] = $t[3];
+        $result['msg']        = $t[0];
+        $result['pn']         = $t[1];
+        $result['bew']        = $t[2];
+        $result['gb']         = $t[3];
         $result['membernews'] = $t[4];
-        $result['umfrage'] = $t[5];
-        $result['special'] = $t[6];
-        $result['reload'] = $t[7];
+        $result['umfrage']    = $t[5];
+        $result['special']    = $t[6];
+        $result['reload']     = $t[7];
         $result['kontostand'] = $t[8];
         // Zeile 2: refsE1|refsE2|refsE3|refsE4|refsE5|nextmoney
         $t = explode('|', $kret[2]);
-        $result['refs'] = array();
-        $result['refs'][1] = $t[0];
-        $result['refs'][2] = $t[1];
-        $result['refs'][3] = $t[2];
-        $result['refs'][4] = $t[3];
-        $result['refs'][5] = $t[4];
+        $result['refs'] = array(
+            1 => $t[0],
+            2 => $t[1],
+            3 => $t[2],
+            4 => $t[3],
+            5 => $t[4],
+        );
         $result['nextmoney'] = $t[5];
         // Zeile 3: myfriend1|myfriend2|myfriend3|....
         $result['myfriends'] = explode('|', $kret[3]);
         // Zeile 4: #lose|#tresor|#gespendet|#geshreddert|last_trans
         $t = explode('|', $kret[4]);
-        $result['lose'] = $t[0];
+        $result['lose']        = $t[0];
         $result['lose_tresor'] = $t[1];
-        $result['lose_spent'] = $t[2];
-        $result['lose_shred'] = $t[3];
-        $result['last_trans'] = $t[4];
+        $result['lose_spent']  = $t[2];
+        $result['lose_shred']  = $t[3];
+        $result['last_trans']  = $t[4];
         // Zeile 5: geschlecht|geburtstag
         $t = explode('|', $kret[5]);
-        $result['gender'] = $t[0];
+        $result['gender']   = $t[0];
         $result['birthday'] = $t[1];
+        // Zeile 6: Notifications
+        $t = explode('|', $kret[6]);
+        $result['notifications'] = array(
+            'buddy_new'   => $t[ 0],
+            'buddy_no'    => $t[ 1],
+            'buddy_yes'   => $t[ 2],
+            'buddy_del'   => $t[ 3],
+            'vb_event'    => $t[ 4],
+            'weblog_cmt'  => $t[ 5],
+            'lose_trans'  => $t[ 6],
+            'pic_cmt'     => $t[ 7],
+            'sv_vote'     => $t[ 8],
+            'mnews_ccmt'  => $t[ 9],
+            'bew_ccmt'    => $t[10],
+            'gb_ccmt'     => $t[11],
+            'pic_ccmt'    => $t[12],
+            'weblog_ccmt' => $t[13],
+            'cine_favc'   => $t[14],
+            'weblog_fav'  => $t[15],
+            'news_favc'   => $t[16],
+            'pic_fac'     => $t[17],
+            'news_ccmt'   => $t[18],
+            'news_thread' => $t[19],
+        );
+        
+        if ($reduce) {
+            $result['notifications'] = array_filter($result['notifications']);
+        }
 
         return $result;
     }
