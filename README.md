@@ -7,7 +7,7 @@ ab.
 
 ## Die Logfunktion
 
-Beim Erzeugen der Klasse kann mittels des Parameters *$logfunc* der Name
+Beim Erzeugen der Klasse kann mittels des Parameters *$log_function* der Name
 einer Log-Funktion angegeben werden, die bei jedem Query aufgerufen wird.
 Die Funktion muss folgende Signatur aufweisen:
 
@@ -17,11 +17,11 @@ Die Funktion muss folgende Signatur aufweisen:
 
 Die Parameter im Einzelnen:
 
-* **$ip**     - Die IP des Aufrufers des Skriptes
+* **$ip**     - Die IP des Aufrufs
 * **$query**  - Die an ExportForce gesendete Anfrage
 * **$result** - Die erste von ExportForce zurückgelieferte Zeile
-              oder *No connect*, falls EF nicht ansprechbar ist,
-              bzw. *No result*, wenn EF nichts zurücklieferte
+                bzw. *No connect* falls EF nicht ansprechbar ist
+                bzw. *No result* wenn EF nichts zurücklieferte
 
 > **!! WICHTIG !!**
 >
@@ -29,21 +29,24 @@ Die Parameter im Einzelnen:
 >   werden!
 
 Wie die Funktion das Loggen übernimmt, bleibt dem Anwender
-überlassen. Hier nur ein funktionierendes Anwendungsbeispiel:
+überlassen. Hier ein funktionierendes Anwendungsbeispiel:
 
     <?php
-     define('LOGFILE', './log/efqueries.log');
-     function _logger($ip, $query, $result) {
-       $fp = fopen(LOGFILE, 'a');
-       if (!$fp)
-         return;
-       fputs($fp, time().' '.$ip.' '.$query.' '.$result."\r\n");
-       fclose($fp);
-     }
-     // ...
-     $ef = new ExportForce($efid, $efpw, $efkennung, true, '_logger');
+        class Logger {
+            const EF_LOG = '../logs/efqueries.log';
 
-## Hinweis zur Verwendung mit D-EF.de (DevelopmentExportforce)
+            static function ExportForce($ip, $query, $result) {
+                if ($fp = fopen(self::EF_LOG, 'a')) {
+                    fputs($fp, time() . ' ' . $ip . ' ' . $query . ' ' . $result . "\n");
+                    fclose($fp);
+                }
+            }
+        }
+        // ...
+        $ef = new ExportForce($id, $pw, $kennung, true, 'Logger::ExportForce');
+         
+
+## Hinweis zur Verwendung mit D-EF.de (DevelopmentExportForce)
 
 Diese Klasse ist durch zwei einzufügende Zeilen problemlos mit D-EF.de nutzbar:
 
