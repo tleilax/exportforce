@@ -24,7 +24,7 @@ Die Parameter im Einzelnen:
 
 > **!! WICHTIG !!**
 >
->   Beim Übergaben der Funktion darf nur der Funktionsname übergeben
+>   Beim Übergeben der Funktion darf nur der Funktionsname übergeben
 >   werden!
 
 Wie die Funktion das Loggen übernimmt, bleibt dem Anwender
