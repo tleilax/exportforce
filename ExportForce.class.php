@@ -1,13 +1,15 @@
 <?php
-/* ExportForce-Klasse v1.64 by tleilax [klammId 27936], 2010-02-08
+/**
+ * ExportForce-Klasse v1.64 by tleilax [klammId 27936], 2010-02-08
  *
- * Copyright (c) 2005-2011 Jan-Hendrik Willms <tleilax+ef2@gmail.com>
- * Lizensiert unter der MIT-Lizenz.
+ * @author    Jan-Hendrik Willms <tleilax+ef2@gmail.com>
+ * @version   1.7
+ * @copyright Copyright (c) 2005-2012, Jan-Hendrik Willms
+ * @license   https://github.com/tleilax/exportforce/blob/master/LICENSE MIT license
  */
 
-class ExportForce
-{
-    const VERSION = '1.64';
+class ExportForce {
+    const VERSION = '1.7';
 
     private $error_reporting = false;
     private $log_function    = null;
@@ -15,10 +17,11 @@ class ExportForce
     private $apiURL  = 'www.klamm.de';
     private $apiPath = 'engine/';
 
+    private $query_count = 0;
+
     var $_goodtest    = false;
     var $_lasterror   = -1;
     var $_efstr       = '';
-    var $_querycount  = 0;
 
     var $_efcalls  = null;
     var $_eflose   = null;
@@ -27,37 +30,6 @@ class ExportForce
     var $_efid      = null;
     var $_efpwd     = null;
     var $_efkennung = null;
-
-    var $_error_messages = array(
-        1001 => 'Alles OK',
-        1002 => 'EF Account existiert nicht',
-        1003 => 'EF Passwort falsch',
-        1004 => 'Nicht genug freie EF Anfragen',
-        1005 => 'EF Kennung existiert nicht',
-        1006 => 'klammUser existiert nicht',
-        1007 => 'klammUser ist gesperrt',
-        1008 => 'klammUser hat zu wenig Lose',
-        1009 => 'Losepasswort falsch',
-        1010 => 'Zu wenig Lose auf EF Account',
-        1011 => 'Anzahl nicht zulässig',
-        1012 => 'Betreff nicht zulässig',
-        1013 => 'Inout Parameter nicht zulässig',
-        1014 => 'Limit Parameter nicht zulässig',
-        1015 => 'ab_tid Parameter nicht zulässig',
-        1016 => 'ab_time Parameter nicht zulässig',
-        1017 => 'type Parameter nicht zulässig',
-        1018 => 'Statistik Passwort falsch',
-        1019 => 'Tresor Parameter nicht zulässig',
-        1020 => 'Empfänger EF existiert nicht',
-        1021 => 'Empfänger EF noch nicht aktiviert',
-        1022 => 'Überweisung an eigenen EF nicht möglich',
-        1023 => 'target Parameter nicht zulässig',
-        1089 => 'Transaktions-Code nicht vorhanden',
-        1097 => 'EF temporär überlastet',
-        1098 => 'EF-Account ist gesperrt',
-        1099 => 'Unbekannter Fehler',
-        -99  => 'ExportForce nicht erreichbar'
-    );
 
     /** 
      * Konstruktor der Klasse
@@ -70,8 +42,7 @@ class ExportForce
      * @param mixed  $log_function    Logfunktion, die bei jedem Query aufgerufen werden
      *                                soll (näheres dazu siehe Dokumentation)
      */
-    public function __construct($id, $pwd, $kennung, $error_reporting = false, $log_function = null)
-    {
+    public function __construct($id, $pwd, $kennung, $error_reporting = false, $log_function = null) {
         $this->_efid      = $id;
         $this->_efpwd     = $pwd;
         $this->_efstr     = 'ef_id='.$ef_id.'&ef_pw='.urlencode($ef_pwd);
@@ -96,9 +67,8 @@ class ExportForce
      * Rückgabe:
      *  - Die Rückgabe der API
      ***********************************************************************/
-    function _efQuery($query)
-    {
-        $this->_querycount++;
+    function _efQuery($query) {
+        $this->query_count += 1;
 
         $fp = @fsockopen($this->apiURL, 80, $errno, $errstr, 15);
         if (!$fp) {
@@ -157,8 +127,7 @@ class ExportForce
      *   false, falls der User nicht überprüft werden konnte oder ein Fehler
      *          aufgetreten ist (Fehlercode in lasterror gespeichert)
      ***********************************************************************/
-    function validate($klammid, $losepw = null)
-    {
+    function validate($klammid, $losepw = null) {
         if ($this->_goodtest) {
             return substr(md5(time()),0,8);
         }
@@ -189,8 +158,7 @@ class ExportForce
      *   false, falls die Lose nicht eingezogen werden konnten oder ein Fehler
      *          aufgetreten ist (Fehlercode in lasterror gespeichert)
      ***********************************************************************/
-    function getlose($anzahl, $betreff, $klammid, $losepw)
-    {
+    function getlose($anzahl, $betreff, $klammid, $losepw) {
         $tcode = md5(uniqid(time()));
         if ($this->_goodtest) {
             return $tcode;
@@ -222,8 +190,7 @@ class ExportForce
      *   false, falls die Lose nicht versandt werden konnten oder ein Fehler
      *          aufgetreten ist (Fehlercode in lasterror gespeichert)
      ***********************************************************************/
-    function sendlose($anzahl, $betreff, $klammid, $losepw = null)
-    {
+    function sendlose($anzahl, $betreff, $klammid, $losepw = null) {
         $tcode = md5(uniqid(time()));
         if ($this->_goodtest) {
             return $tcode;
@@ -268,8 +235,7 @@ class ExportForce
      *  würde bei einem Losestand von 0 Losen auch die Fehlerbehandlung
      *  einleiten.
      ***********************************************************************/
-    function getuserlose($klammid, $losepw, $refresh = false)
-    {
+    function getuserlose($klammid, $losepw, $refresh = false) {
         if ($this->_goodtest) {
             return mt_rand(0, 1000000);
         }
@@ -321,8 +287,7 @@ class ExportForce
      *                    jeweiligen Ebene
      *   'myfriends'   => Array[0..x] aller myFriends, die online sind
      ***********************************************************************/
-    function getuserstatistics($klammid, $statspw)
-    {
+    function getuserstatistics($klammid, $statspw) {
         $efQuery = 'klamm/data.php?'.$this->_efstr.'&k_id='.$klammid.'&s_pw='.urlencode($statspw);
 
         if (($kret = $this->_efQuery($efQuery)) === false) {
@@ -384,8 +349,7 @@ class ExportForce
      *   false, falls die Lose nicht versandt werden konnten oder ein Fehler
      *          aufgetreten ist (Fehlercode in lasterror gespeichert)
      ***********************************************************************/
-    function ef_sendlose($anzahl, $betreff, $ef_id)
-    {
+    function ef_sendlose($anzahl, $betreff, $ef_id) {
         $tcode = md5(uniqid(time()));
         if ($this->_goodtest) {
             return $code;
@@ -416,8 +380,7 @@ class ExportForce
      *   false, falls die Lose nicht gesichert werden konnten oder ein Fehler
      *          aufgetreten ist (Fehlercode in lasterror gespeichert)
      ***********************************************************************/
-    function ef_savelose($anzahl)
-    {
+    function ef_savelose($anzahl) {
         return $this->ef_sendlose($anzahl, '', -1);
     }
 
@@ -434,8 +397,7 @@ class ExportForce
      * !! Beachte !!
      *  Bei dieser Funktion gilt die gleiche Bemerkung wie bei getuserlose().
      ***********************************************************************/
-    function geteflose($tresor = false, $refresh = false)
-    {
+    function geteflose($tresor = false, $refresh = false) {
         if ($this->_goodtest) {
             return mt_rand(0, 1000000);
         }
@@ -485,8 +447,7 @@ class ExportForce
      *    'kennung'   => Verwendete Kennung
      *    'subject'   => Betreff der Transaktion
      ***********************************************************************/
-    function _gettransactions($efQuery, $skip = 0, $limit = 0, $inout = null, $ab_tid = null, $ab_time = null, $type = null, $target = null)
-    {
+    function _gettransactions($efQuery, $skip = 0, $limit = 0, $inout = null, $ab_tid = null, $ab_time = null, $type = null, $target = null) {
         if ($inout !== null) {
             $efQuery .= '&inout='.$inout;
         }
@@ -543,8 +504,7 @@ class ExportForce
      * Rückgabe:
      *  [siehe _gettransactions()]
      ***********************************************************************/
-    function getusertransactions($klammid, $statspw, $skip = 0, $limit = 0, $inout = null, $ab_tid = null, $ab_time = null, $type = null, $target = null)
-    {
+    function getusertransactions($klammid, $statspw, $skip = 0, $limit = 0, $inout = null, $ab_tid = null, $ab_time = null, $type = null, $target = null) {
         $efQuery = 'klamm/tlist.php?'.$this->_efstr.'&k_id='.$klammid.'&s_pw='.url($statspw);
         return $this->_gettransactions($efQuery, $skip, $limit, $inout, $ab_tid, $ab_time, $type, $target);
     }
@@ -556,8 +516,7 @@ class ExportForce
      * Rückgabe:
      *  [siehe _gettransactions()]
     ***********************************************************************/
-    function geteftransactions($skip = 0, $limit = 0, $inout = null, $ab_tid = null, $ab_time = null, $type = null, $target = null)
-    {
+    function geteftransactions($skip = 0, $limit = 0, $inout = null, $ab_tid = null, $ab_time = null, $type = null, $target = null) {
         $efQuery = 'lose/tlist.php?'.$this->_efstr;
         return $this->_gettransactions($efQuery, $skip, $limit, $inout, $ab_tid, $ab_time, $type, $target);
     }
@@ -570,8 +529,7 @@ class ExportForce
      *   ReturnCode der Transaktion
      *   false, falls die Transaktion nicht überprüft werden konnte
      ***********************************************************************/
-    function confirm($tcode, &$timestamp)
-    {
+    function confirm($tcode, &$timestamp) {
         if ($this->_goodtest) {
             return true;
         }
@@ -618,8 +576,7 @@ class ExportForce
      *   'online_radio' => Online-Benutzerzahl des Radios
      *   'lose_daily'   => Anzahl der gesetzten Lose für die Tagesverlosung
      ***********************************************************************/
-    function efgetstatistics()
-    {
+    function efgetstatistics() {
         $efQuery = 'klamm/stats.php?'.$this->_efstr;
 
         if (($kret = $this->_efQuery($efQuery)) === false) {
@@ -673,8 +630,7 @@ class ExportForce
      *     (Zeitpunkt des Abmeldens) enthält
      *   false, falls ein Fehler bei der Abfrage aufgetreten ist
      ***********************************************************************/
-    function getcancelqueue($timestamp = null)
-    {
+    function getcancelqueue($timestamp = null) {
         $efQuery = 'klamm/cancel.php?'.$this->_efstr;
         if ($timestamp != null) {
             $efQuery .= '&ab_time='.$timestamp;
@@ -709,8 +665,7 @@ class ExportForce
      *     (Zeitpunkt der Sperrung) enthält
      *   false, falls ein Fehler bei der Abfrage aufgetreten ist
      ***********************************************************************/
-    function getabusequeue($timestamp = null)
-    {
+    function getabusequeue($timestamp = null) {
         $efQuery = 'klamm/abuse.php?'.$this->_efstr;
         if ($timestamp != null) {
             $efQuery .= '&ab_time='.$timestamp;
@@ -736,28 +691,61 @@ class ExportForce
         return $result;
     }
 
-    /** Gibt eine Fehlermeldung zu einem EF-Errorcode zurück
-     * Parameter:
-     *  $error - EF-Errorcode (optional, falls nicht angegeben, wird der letzte
-     *                         aufgetretene Fehler ausgewertet)
-     * Rückgabe:
-     *  String, der eine Fehlermeldung zu dem (übergegeben) Errorcode enthält
-     *************************************************************************/
-    function errorstr($error = null)
-    {
-        if ($error === null) {
-            $error = $this->_lasterror;
+    /** 
+     * Gibt eine Fehlermeldung zu einem EF-Errorcode zurück
+     *
+     * @param mixed   $error EF-Errorcode (falls nicht angegeben wird der
+     *                       letzte aufgetretene Fehler ausgewertet)
+     * @return String Fehlermeldung zum Errorcode
+     */
+    function errorstr($error_code = null) {
+        if ($error_code === null) {
+            $error_code = $this->_lasterror;
         }
 
-        return isset($this->_error_messages[$error])
-            ? $this->_error_messages[$error]
+        $messages = array(
+            1001 => 'Alles OK',
+            1002 => 'EF Account existiert nicht',
+            1003 => 'EF Passwort falsch',
+            1004 => 'Nicht genug freie EF Anfragen',
+            1005 => 'EF Kennung existiert nicht',
+            1006 => 'klammUser existiert nicht',
+            1007 => 'klammUser ist gesperrt',
+            1008 => 'klammUser hat zu wenig Lose',
+            1009 => 'Losepasswort falsch',
+            1010 => 'Zu wenig Lose auf EF Account',
+            1011 => 'Anzahl nicht zulässig',
+            1012 => 'Betreff nicht zulässig',
+            1013 => 'Inout Parameter nicht zulässig',
+            1014 => 'Limit Parameter nicht zulässig',
+            1015 => 'ab_tid Parameter nicht zulässig',
+            1016 => 'ab_time Parameter nicht zulässig',
+            1017 => 'type Parameter nicht zulässig',
+            1018 => 'Statistik Passwort falsch',
+            1019 => 'Tresor Parameter nicht zulässig',
+            1020 => 'Empfänger EF existiert nicht',
+            1021 => 'Empfänger EF noch nicht aktiviert',
+            1022 => 'Überweisung an eigenen EF nicht möglich',
+            1023 => 'target Parameter nicht zulässig',
+            1089 => 'Transaktions-Code nicht vorhanden',
+            1097 => 'EF temporär überlastet',
+            1098 => 'EF-Account ist gesperrt',
+            1099 => 'Unbekannter Fehler',
+            -99  => 'ExportForce nicht erreichbar'
+        );
+
+        return isset($messages[$error_code])
+            ? $messages[$error_code]
             : 'Ausserordentlicher Fehler';
     }
 
-    /** Gibt die Anzahl aller getätigten API-Aufrüfe zurück
-     *********************************************************/
+    /** 
+     * Gibt die Anzahl aller getätigten API-Aufrüfe zurück
+     *
+     * @return int Anzahl der getätigten API-Aufrufe
+     */
     function getquerycount() {
-        return $this->_querycount;
+        return $this->query_count;
     }
 
     /** Gibt die Anzahl der verbliebenen API-Anfragen zurück
