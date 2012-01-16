@@ -290,7 +290,7 @@ class ExportForce {
      *   'myfriends'     => Array[0..x] aller myFriends, die online sind
      *   'notifications' => Name und Anzahl der aktuellen Notifications
      ***********************************************************************/
-    function getuserstatistics($klammid, $statspw, $reduce_notifications = true) {
+    function getuserstatistics($klammid, $statspw, $reduce = true) {
         $efQuery = 'klamm/data.php?'.$this->_efstr.'&k_id='.$klammid.'&s_pw='.urlencode($statspw);
 
         if (($kret = $this->_efQuery($efQuery)) === false) {
