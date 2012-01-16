@@ -7,12 +7,13 @@ ab.
 
 ## Die Logfunktion
 
-Beim Erzeugen der Klasse kann mittels des Parameters *$logfunc* der
-Name einer selbst geschriebenen Log-Funktion angegeben werden,
-die anschliessend bei jedem Query aufgerufen wird.
-Die Funktion muss folgenden Aufbau haben:
+Beim Erzeugen der Klasse kann mittels des Parameters *$logfunc* der Name
+einer Log-Funktion angegeben werden, die bei jedem Query aufgerufen wird.
+Die Funktion muss folgende Signatur aufweisen:
 
-    function funktionsname($ip, $query, $result);
+    function log($ip, $query, $result) {
+        // ...
+    }
 
 Die Parameter im Einzelnen:
 
