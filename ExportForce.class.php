@@ -45,7 +45,7 @@ class ExportForce {
     public function __construct($id, $pwd, $kennung, $error_reporting = false, $log_function = null) {
         $this->_efid      = $id;
         $this->_efpwd     = $pwd;
-        $this->_efstr     = 'ef_id='.$ef_id.'&ef_pw='.urlencode($ef_pwd);
+        $this->_efstr     = 'ef_id='.$id.'&ef_pw='.urlencode($pwd);
         $this->_efkennung = $kennung;
 
         $this->error_reporting = $error_reporting;
