@@ -8,16 +8,17 @@
 class ExportForce
 {
     const VERSION = '1.64';
-    
+
+    private $error_reporting = false;
+    private $log_function    = null;
+
+    private $apiURL  = 'www.klamm.de';
+    private $apiPath = 'engine/';
+
     var $_goodtest    = false;
-    var $_logfunc     = null;
-    var $_reporterror = false;
     var $_lasterror   = -1;
     var $_efstr       = '';
     var $_querycount  = 0;
-
-    var $_apiurl   = 'www.klamm.de';
-    var $_apipath  = 'engine/';
 
     var $_efcalls  = null;
     var $_eflose   = null;
@@ -58,35 +59,33 @@ class ExportForce
         -99  => 'ExportForce nicht erreichbar'
     );
 
-    /** Konstruktor der Klasse
-     * Parameter:
-     *   $ef_id       - ID des ExportForce-Accounts
-     *   $ef_pwd      - Password des ExportForce-Accounts
-     *   $ef_kennung  - Eine Kennungs-ID des ExportForce-Accounts
-     *                  (Eine Zahl, kein Text!!)
-     *   $reporterror - Fehlermeldungen anzeigen (optional, default=false)
-     *   $logfunc     - Logfunktion, die bei jedem Query aufgerufen werden
-     *                  soll (näheres dazu, siehe Header der Klasse)
+    /** 
+     * Konstruktor der Klasse
      *
-     * Rückgabe:
-     *  - keine -
-     **********************************************************************/
-    function __construct($ef_id, $ef_pwd, $ef_kennung, $reporterror = false, $logfunc = null)
+     * @param int    $id              ID des ExportForce-Accounts
+     * @param String $pwd             Password des ExportForce-Accounts
+     * @param int    $kennung         Eine Kennungs-ID des ExportForce-Accounts
+     *                                (Eine Zahl, kein Text!)
+     * @param bool   $error_reporting Fehlermeldungen anzeigen (default=false)
+     * @param mixed  $log_function    Logfunktion, die bei jedem Query aufgerufen werden
+     *                                soll (näheres dazu siehe Dokumentation)
+     */
+    public function __construct($id, $pwd, $kennung, $error_reporting = false, $log_function = null)
     {
-        $this->_efid = $ef_id;
-        $this->_efpwd = $ef_pwd;
-        $this->_efstr = 'ef_id='.$ef_id.'&ef_pw='.urlencode($ef_pwd);
-        $this->_efkennung = $ef_kennung;
+        $this->_efid      = $id;
+        $this->_efpwd     = $pwd;
+        $this->_efstr     = 'ef_id='.$ef_id.'&ef_pw='.urlencode($ef_pwd);
+        $this->_efkennung = $kennung;
 
-        $this->_reporterror=$reporterror;
-        if ($logfunc !== null and function_exists($logfunc)) {
-            $this->_logfunc = $logfunc;
+        $this->error_reporting = $error_reporting;
+        if ($log_function !== null and is_callable($log_function)) {
+            $this->log_function = $log_function;
         }
 
-        if (preg_match('~\D~', $ef_id) and $this->_reporterror) {
+        if (preg_match('~\D~', $ef_id) and $this->error_reporting) {
             throw new Exception('Die übergebene ExportForce-ID kann nicht gültig sein');
         }
-        if (preg_match('~\D~', $ef_kennung) and $this->reporterror) {
+        if (preg_match('~\D~', $ef_kennung) and $this->error_reporting) {
             throw new Exception('Als Kennung muss eine Zahl angegeben werden');
         }
     }
@@ -101,20 +100,20 @@ class ExportForce
     {
         $this->_querycount++;
 
-        $fp = @fsockopen($this->_apiurl, 80, $errno, $errstr, 15);
+        $fp = @fsockopen($this->apiURL, 80, $errno, $errstr, 15);
         if (!$fp) {
-            if ($this->_logfunc !== null) {
-                call_user_func($this->_logfunc, $_SERVER['REMOTE_ADDR'], $query, 'No connect');
+            if ($this->log_function !== null) {
+                call_user_func($this->log_function, $_SERVER['REMOTE_ADDR'], $query, 'No connect');
             }
             $this->_lasterror = -99;
 
-            if ($this->_reporterror) {
+            if ($this->error_reporting) {
                 throw new Exception('ExportForce nicht erreichbar');
             }
             return false;
         }
-        $request = "GET /{$this->_apipath}{$query} HTTP/1.0\r\n"
-                 . "Host: {$this->_apiurl}\r\n"
+        $request = "GET /{$this->apiPath}{$query} HTTP/1.0\r\n"
+                 . "Host: {$this->apiURL}\r\n"
                  . "User-Agent: tlx_ef2class_".self::VERSION."\r\n"
                  . "Content-Type: text/html\r\n"
                  . "Content-Length: 0\r\n"
@@ -133,8 +132,8 @@ class ExportForce
         fclose($fp);
 
         if ($result) {
-            if ($this->_logfunc !== null) {
-                call_user_func($this->_logfunc, $_SERVER['REMOTE_ADDR'], $query, $result[0]);
+            if ($this->log_function !== null) {
+                call_user_func($this->log_function, $_SERVER['REMOTE_ADDR'], $query, $result[0]);
             }
             $tmpinfo = explode('|', $result[0]);
             $this->_lasterror = $tmpinfo[0];
@@ -143,8 +142,8 @@ class ExportForce
             } else {
                 $this->_efcalls = $tmpinfo[2];
             }
-        } elseif ($this->_logfunc !== null) {
-            call_user_func($this->_logfunc, $_SERVER['REMOTE_ADDR'], $query, 'No result');
+        } elseif ($this->log_function !== null) {
+            call_user_func($this->log_function, $_SERVER['REMOTE_ADDR'], $query, 'No result');
         }
         return $result;
     }
@@ -757,36 +756,31 @@ class ExportForce
 
     /** Gibt die Anzahl aller getätigten API-Aufrüfe zurück
      *********************************************************/
-    function getquerycount()
-    {
+    function getquerycount() {
         return $this->_querycount;
     }
 
     /** Gibt die Anzahl der verbliebenen API-Anfragen zurück
      *********************************************************/
-    function getefcalls()
-    {
+    function getefcalls() {
         return $this->_efcalls;
     }
 
     /**
      *********************************************************/
-    function goodtest($state = true)
-    {
+    function goodtest($state = true) {
         $this->_goodtest = $state;
     }
 
     /**
      *********************************************************/
-    function setapiurl($url)
-    {
-        $this->_apiurl = $url;
+    function setApiURL($url) {
+        $this->apiURL = $url;
     }
 
     /**
      *********************************************************/
-    function setapipath($path)
-    {
-        $this->_apipath = $path;
+    function setApiPath($path) {
+        $this->apiPath = $path;
     }
 }
