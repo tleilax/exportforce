@@ -1,5 +1,10 @@
 # klamm.de's ExportForce in PHP
 
+Diese Klasse bildet die Funktionen der [ExportForce-API][ef] von klamm.de
+ab.
+
+[ef]: http://ef.klamm.de "ExportForce-API"
+
 ## Die Logfunktion
 
 Beim Erzeugen der Klasse kann mittels des Parameters *$logfunc* der

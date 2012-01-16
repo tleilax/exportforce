@@ -1,6 +1,6 @@
 <?php
 /**
- * ExportForce-Klasse v1.64 by tleilax [klammId 27936], 2010-02-08
+ * ExportForce-Klasse for PHP
  *
  * @author    Jan-Hendrik Willms <tleilax+ef2@gmail.com>
  * @version   1.7
