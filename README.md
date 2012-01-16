@@ -23,13 +23,8 @@ Die Parameter im Einzelnen:
                 bzw. *No connect* falls EF nicht ansprechbar ist
                 bzw. *No result* wenn EF nichts zurücklieferte
 
-> **!! WICHTIG !!**
->
->   Beim Übergeben der Funktion darf nur der Funktionsname übergeben
->   werden!
-
-Wie die Funktion das Loggen übernimmt, bleibt dem Anwender
-überlassen. Hier ein funktionierendes Anwendungsbeispiel:
+Wie die Funktion das Loggen übernimmt bleibt dem Anwender
+überlassen. Ein funktionierendes Anwendungsbeispiel:
 
     <?php
         class Logger {
