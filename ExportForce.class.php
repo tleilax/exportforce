@@ -573,6 +573,9 @@ class ExportForce {
         }
 
         $kres = explode('|', $kret[0]);
+        if ($kres[0] == 1089) {
+            return 1089; // mit Fehlercode verlassen, wenn Transaktioncode unbekannt
+        }
         if ($kres[0] != 1001) {
             return false;
         }
