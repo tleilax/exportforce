@@ -153,13 +153,16 @@ class ExportForce {
      *  $betreff - Betreff der Transaktion
      *  $klammid - KlammID des Users, von dem die Lose eingeogen werden sollen
      *  $losepw  - Losepasswort des Users
+     *  $tcode   - Transaktionscode (optional)
      * Rückgabe:
      *   Transaktionscode, wenn die Lose erfolgreich eingezogen wurden
      *   false, falls die Lose nicht eingezogen werden konnten oder ein Fehler
      *          aufgetreten ist (Fehlercode in lasterror gespeichert)
      ***********************************************************************/
-    function getlose($anzahl, $betreff, $klammid, $losepw) {
-        $tcode = md5(uniqid(time()));
+    function getlose($anzahl, $betreff, $klammid, $losepw, $tcode = null) {
+        if ($tcode === null) {
+            $tcode = md5(uniqid('Transaktionscode', true));
+        }
         if ($this->_goodtest) {
             return $tcode;
         }
@@ -185,13 +188,16 @@ class ExportForce {
      *  $betreff - Betreff der Transaktion
      *  $klammid - KlammID des Users, dem die Lose gesendet werden sollen
      *  $losepw  - Losepasswort des Users (optional)
+     *  $tcode   - Transaktionscode (optional)
      * Rückgabe:
      *   Transaktionscode, wenn die Lose erfolgreich eingezogen wurden
      *   false, falls die Lose nicht versandt werden konnten oder ein Fehler
      *          aufgetreten ist (Fehlercode in lasterror gespeichert)
      ***********************************************************************/
-    function sendlose($anzahl, $betreff, $klammid, $losepw = null) {
-        $tcode = md5(uniqid(time()));
+    function sendlose($anzahl, $betreff, $klammid, $losepw = null, $tcode = null) {
+        if ($tcode === null) {
+            $tcode = md5(uniqid('Transaktionscode', true));
+        }
         if ($this->_goodtest) {
             return $tcode;
         }
