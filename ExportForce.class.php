@@ -19,6 +19,10 @@ class ExportForce {
 
     private $query_count = 0;
 
+    private $id       = null;
+    private $password = null;
+    private $kennung  = null;
+
     var $_goodtest    = false;
     var $_lasterror   = -1;
     var $_efstr       = '';
@@ -26,10 +30,6 @@ class ExportForce {
     var $_efcalls  = null;
     var $_eflose   = null;
     var $_userlose = null;
-
-    var $_efid      = null;
-    var $_efpwd     = null;
-    var $_efkennung = null;
 
     /** 
      * Konstruktor der Klasse
@@ -43,21 +43,22 @@ class ExportForce {
      *                                soll (näheres dazu siehe Dokumentation)
      */
     public function __construct($id, $pwd, $kennung, $error_reporting = false, $log_function = null) {
-        $this->_efid      = $id;
-        $this->_efpwd     = $pwd;
-        $this->_efstr     = 'ef_id='.$id.'&ef_pw='.urlencode($pwd);
-        $this->_efkennung = $kennung;
+        if (preg_match('~\D~', $id) and $this->error_reporting) {
+            throw new Exception('Die übergebene ExportForce-ID kann nicht gültig sein');
+        }
+        if (preg_match('~\D~', $kennung) and $this->error_reporting) {
+            throw new Exception('Als Kennung muss eine Zahl angegeben werden');
+        }
+
+        $this->id       = $id;
+        $this->password = $pwd;
+        $this->kennung  = $kennung;
+
+        $this->_efstr   = 'ef_id=' . $id . '&ef_pw=' . urlencode($pwd);
 
         $this->error_reporting = $error_reporting;
         if ($log_function !== null and is_callable($log_function)) {
             $this->log_function = $log_function;
-        }
-
-        if (preg_match('~\D~', $ef_id) and $this->error_reporting) {
-            throw new Exception('Die übergebene ExportForce-ID kann nicht gültig sein');
-        }
-        if (preg_match('~\D~', $ef_kennung) and $this->error_reporting) {
-            throw new Exception('Als Kennung muss eine Zahl angegeben werden');
         }
     }
 
@@ -168,7 +169,7 @@ class ExportForce {
         }
 
         $s = urlencode($betreff);
-        $efQuery = 'lose/get.php?'.$this->_efstr.'&k='.$this->_efkennung.'&k_id='.$klammid.'&l_pw='.urlencode($losepw).'&s='.$s.'&n='.$anzahl.'&code='.$tcode;
+        $efQuery = 'lose/get.php?'.$this->_efstr.'&k='.$this->kennung.'&k_id='.$klammid.'&l_pw='.urlencode($losepw).'&s='.$s.'&n='.$anzahl.'&code='.$tcode;
 
         if (($kret = $this->_efQuery($efQuery)) === false) {
             return false;
@@ -203,7 +204,7 @@ class ExportForce {
         }
 
         $s = urlencode($betreff);
-        $efQuery = 'lose/send.php?'.$this->_efstr.'&k='.$this->_efkennung.'&k_id='.$klammid.'&s='.$s.'&n='.$anzahl.'&code='.$tcode;
+        $efQuery = 'lose/send.php?'.$this->_efstr.'&k='.$this->kennung.'&k_id='.$klammid.'&s='.$s.'&n='.$anzahl.'&code='.$tcode;
         if (!empty($losepw)) {
             $efQuery .= '&l_pw='.urlencode($losepw);
         }
@@ -393,7 +394,7 @@ class ExportForce {
             return $code;
         }
 
-        $efQuery = 'lose/efsend.php?'.$this->_efstr.'&k='.$this->_efkennung.'&n='.$anzahl.'&empf='.$ef_id.'&code='.$tcode;
+        $efQuery = 'lose/efsend.php?'.$this->_efstr.'&k='.$this->kennung.'&n='.$anzahl.'&empf='.$ef_id.'&code='.$tcode;
         if ($ef_id != -1) {
             $efQuery .= '&s='.urlencode($betreff);
         }
